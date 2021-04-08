@@ -1,5 +1,4 @@
-import knapsack,oneplusone
-import csv
+import knapsack, oneplusone, csv
 outputfilepath = '..\\..\\..\\output\\test1.csv'
 
 data_files = {
@@ -12,11 +11,10 @@ def test(items, b, alpha, delta):
     i = 0
     P1 = 0
     P2 = 0
-    test_loops = 10 ## chenge when commit
+    test_loops = 30
     #print("Alpha : ",alpha, "Delta : ", delta, " Bound:", b)
     while i < test_loops:
-        print(i)
-        p1= 1 #p1= oneplusone.run(items, b, alpha, delta, oneplusone.CHEBYSHEV)
+        p1= oneplusone.run(items, b, alpha, delta, oneplusone.CHEBYSHEV)
         p2 = oneplusone.run(items, b, alpha, delta, oneplusone.CHERNOFF)
         P1 += p1
         P2 += p2

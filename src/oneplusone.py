@@ -56,10 +56,10 @@ def fitness(genome, items, b, alpha, delta, method)-> Fitness:
                 v = chebyshev_v(k, diff, alpha, delta)                
             if(method == CHERNOFF):
                 v = chernoff_v(k, diff, alpha, delta)
+            return Fitness(0, v, p)
         else:
             u = ew - b
-            v = 1 ## v = 1 - alpha
-        return Fitness(u,v,p)
+            return Fitness(u,1,p)
     return []
 
 # k = sum of x_i in solution X
