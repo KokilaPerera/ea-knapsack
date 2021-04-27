@@ -1,6 +1,6 @@
 from knapsack import Item
 from typing import List
-from random import choices, uniform
+from random import choices, uniform, random
 
 class Genome:
     ew = -1
@@ -18,36 +18,46 @@ class Genome:
             self.n = len(genome)
             self.genome = genome
 
+    def __copy__(self):
+        clone = Genome(genome = self.genome.copy())
+        clone.k = self.k
+        clone.p = self.p
+        clone.ew = self.ew
+        clone.n = self.n
+        return clone
+
     #mutation with 1/n probability for each gene
     def offspring(self, items:[Item])->'Genome':
-        child = Genome(genome = self.genome.copy())
-        child.k = self.k
-        child.p = self.p
-        child.ew = self.ew
-        child.n = self.n
-
-        g = child.genome
-        i = 1
-        while i < self.n:
-            mutationPos = int(uniform(1,self.n))
-            if mutationPos == i  :
-                g[i-1]= abs(g[i-1] - 1)
-                if g[i-1] == 1 :
-                    child.k += 1
-                    child.ew += items[i-1].expected_weight
-                    child.p += items[i-1].profit
-                else :
-                    child.k -= 1
-                    child.ew -= items[i-1].expected_weight
-                    child.p -= items[i-1].profit
-            i+=1
+        child = self.__copy__()
+        child.mutation(items)
         return child
+    
+    def mutation(self, items= []):
+        g = self.genome
+        i = 0
+        while i < self.n :
+##            mutationPos = int(uniform(0, self.n))
+            mutationPos = int(random()* 100)
+            j = i +1
+            i = mutationPos
+            if mutationPos == i  :
+                g[i]= abs(g[i] - 1)
+                if(len(items) > 0):
+                    if g[i] == 1 :
+                        self.k += 1
+                        self.ew += items[i].expected_weight
+                        self.p += items[i].profit
+                    else :
+                        self.k -= 1
+                        self.ew -= items[i].expected_weight
+                        self.p -= items[i].profit
+            i = j
+            #break
 
     def expected_weight(self, items:[Item]):
         if(self.ew < 0):
             self.calculate_ew_p(items)
         return self.ew;
-
 
     def profit(self, items:[Item]):
         if(self.p < 0):

@@ -1,32 +1,31 @@
 from genome import Genome
+from knapsack import Knapsack
 from math import exp
-from random import randint, uniform
 from collections import namedtuple
 
 CHEBYSHEV = 1
 CHERNOFF = 2
 
-GENOME_X = 0
-GENOME_Y = 1
-
-
 Fitness = namedtuple('Fitness',['u','v','p'])
 
-def run(items, b, alpha, delta,method)->[int,int]:
-    genomeX = Genome(n = len(items));
-    fitnessX = fitness(genomeX, items, b,alpha, delta, method)
+
+def run(instance:Knapsack, alpha, delta,fitness_evaluations, method)->int:
+    genomeX = Genome(n = len(instance.items));
+    fitnessX = fitness(genomeX, instance, alpha, delta, method)
+    ##print("\ti:0|k:", genomeX.countItems(),'|e:',genomeX.expected_weight(instance.items), '|f:',fitnessX)
+    
     i = 0
     j = 0
-    while( i < 100000 ):
-        genomeY = mutation(genomeX, items)
-        fitnessY = fitness(genomeY,items, b, alpha, delta, method)
-        if (selection(fitnessX,fitnessY)==GENOME_Y):
-            #print("\ti:",i,"k:", genomeY.countItems(),'|e:',genomeY.expected_weight(items), '|f:',fitnessY )
+    while( i < fitness_evaluations ):
+        i += 1
+        genomeY = mutation(genomeX, instance.items)
+        fitnessY = fitness(genomeY, instance, alpha, delta, method)
+        if (selection(fitnessX,fitnessY)>0):
+            print("\ti:",i,"|k:", genomeY.countItems(),'|e:',genomeY.expected_weight(instance.items), '|f:',fitnessY )
             genomeX = genomeY            
             fitnessX = fitnessY
-        i += 1
     
-    #print(i,"k:", genomeX.countItems(),"\te:",genomeX.expected_weight(items),"\tp:",fitnessX[2])
+    print("****\ti:",i,"|k:", genomeX.countItems(),'|e:',genomeX.expected_weight(instance.items), '|f:',fitnessX[2],"\n*****")
     return fitnessX[2]
 
 def mutation(parent:Genome, items) :
@@ -36,29 +35,26 @@ def mutation(parent:Genome, items) :
 def selection(fitnessX:Fitness, fitnessY:Fitness) -> int:
     if(fitnessX.u==fitnessY.u):
         if (fitnessX.v==fitnessY.v):
-            return selectMin_x_y(fitnessY.p,fitnessX.p)
+            return compare(fitnessY.p,fitnessX.p)
         else:
-            return selectMin_x_y(fitnessX.v,fitnessY.v)
+            return compare(fitnessX.v,fitnessY.v)
     else:
-        return selectMin_x_y(fitnessX.u,fitnessY.u)
+        return compare(fitnessX.u,fitnessY.u)
 
-#single objective
-def fitness(genome, items, b, alpha, delta, method)-> Fitness:  
-    
+def fitness(genome, instance:Knapsack, alpha, delta, method)-> Fitness:
     if (delta >0):
-        ew = genome.expected_weight(items)
-        p = genome.profit(items)
-        if ew < b :
-            u = 0
-            diff = b - ew
+        ew = genome.expected_weight(instance.items)
+        p = genome.profit(instance.items)
+        if ew < instance.bound :
+            diff = instance.bound - ew
             k = genome.countItems()
             if(method == CHEBYSHEV):
-                v = chebyshev_v(k, diff, alpha, delta)                
+                v = max(chebyshev_v(k, diff, alpha, delta), 0)
             if(method == CHERNOFF):
-                v = chernoff_v(k, diff, alpha, delta)
+                v = max(chernoff_v(k, diff, alpha, delta),0)
             return Fitness(0, v, p)
         else:
-            u = ew - b
+            u = ew - instance.bound
             return Fitness(u,1,p)
     return []
 
@@ -68,35 +64,31 @@ def chebyshev_v(k, diff, alpha, delta):
     if (delta >0):
         temp1 = k * ( delta ** 2 )
         temp2 = 3 * ( diff ** 2)
-        temp1 = temp1 / (temp1 + temp2)
-        if(temp1 < alpha):
-            return 0
-        return temp1 - alpha
+        temp = temp1 / (temp1 + temp2)
+        return temp - alpha
     return -1
 
 # k = sum of x_i in solution X
 # diff = B - Ew(X)
 # return the value by which the prob exceed alpha
 def chernoff_v(k, diff, alpha, delta):
-    if (delta > 0):        
-        epsilon = diff / (k * delta)            
+    if (delta > 0):
+        if ( k == 0 ):
+            return 0
+        epsilon = diff / (k * delta)
         dividend = exp(epsilon)
-        epsilon += 1
-        divisor = epsilon ** epsilon
-        
+        divisor = ( epsilon + 1) ** ( epsilon + 1 )
+
         temp = dividend / divisor
-##        exponent = k / 2
-##        if(temp > alpha or exponent < 0.5):
-##            temp = temp ** exponent
-##            if temp > alpha:
-##                return temp - alpha
-        if temp > alpha:
-            return temp - alpha
-        return 0
+        temp = temp ** (k / 2)
+        return temp - alpha
     return -1
 
-def selectMin_x_y(x,y) -> int:
+## 'compare' takes 2 int parameters x and y
+## return -1 if x is less than y
+## otherwise return 1
+def compare(x,y) -> int:
     if x > y:
-        return GENOME_Y
+        return 1
     else:
-        return GENOME_X
+        return -1
