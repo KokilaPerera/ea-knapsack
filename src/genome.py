@@ -26,7 +26,9 @@ class Genome:
         clone.n = self.n
         return clone
 
-    #mutation with 1/n probability for each gene
+    def __str__(self):
+        return str(self.k)+ " items : p = " + str(self.p) + " ew = " + str(self.ew)
+
     def offspring(self, items:[Item])->'Genome':
         child = self.__copy__()
         child.mutation(items)
@@ -38,9 +40,7 @@ class Genome:
         while i < self.n :
 ##            mutationPos = int(uniform(0, self.n))
             mutationPos = int(random()* 100)
-            j = i +1
-            i = mutationPos
-            if mutationPos == i  :
+            if mutationPos == i :
                 g[i]= abs(g[i] - 1)
                 if(len(items) > 0):
                     if g[i] == 1 :
@@ -51,7 +51,7 @@ class Genome:
                         self.k -= 1
                         self.ew -= items[i].expected_weight
                         self.p -= items[i].profit
-            i = j
+            i += 1
             #break
 
     def expected_weight(self, items:[Item]):
