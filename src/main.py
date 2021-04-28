@@ -1,6 +1,9 @@
 import knapsack, oneplusone, csv
 from collections import namedtuple
 from knapsack import Knapsack
+from ea import CHEBYSHEV, CHERNOFF
+from oneplusone import OnePlusOne
+from gsemo import GSEMO
 
 Parameter = namedtuple('Parameter',['name', "desc",'is_int','single_value','value', "min_value", "max_value"])
 outputfilepath = '..\\output\\test1.csv'
@@ -22,7 +25,8 @@ def test(instance:Knapsack, alpha, delta, test_loops, fitness_evaluations, metho
         i = 0
         while i < test_loops:
             i += 1
-            p1= oneplusone.run(instance, alpha, delta, fitness_evaluations, oneplusone.CHEBYSHEV)
+            opo = GSEMO(instance)
+            p1= opo.run(alpha, delta, fitness_evaluations, CHEBYSHEV)
             P1 += p1
             #print("Iteration ", i, " (Chebyshev) : ", p1)
             
@@ -30,7 +34,10 @@ def test(instance:Knapsack, alpha, delta, test_loops, fitness_evaluations, metho
         i = 0
         while i < test_loops:
             i += 1
-            p2 = oneplusone.run(instance, alpha, delta, fitness_evaluations, oneplusone.CHERNOFF)
+
+            #opo = OnePlusOne(instance)
+            opo = GSEMO(instance)
+            p2 = opo.run(alpha, delta, fitness_evaluations, CHERNOFF)
             #print("Iteration ", i, " (Chernoff): ", p2)
             P2 += p2
     P1 /= test_loops
