@@ -17,7 +17,7 @@ parameters = {"alpha" : Parameter ("alpha", "Default alpha", False, False, [0.00
               "test_loops" : Parameter ("test_loops", "Default no of iterations", True, True, 30, 1, 30),
               "fitness_evaluations" : Parameter ("fitness_evaluations","Default no of fitness evaluations", True, True, 100000, 1000, 100000 )}
 
-def test(instance:Knapsack, alpha, delta, test_loops, fitness_evaluations, method):
+def test(algo, alpha, delta, test_loops, fitness_evaluations, method):
     P1 = 0
     P2 = 0
    
@@ -25,8 +25,7 @@ def test(instance:Knapsack, alpha, delta, test_loops, fitness_evaluations, metho
         i = 0
         while i < test_loops:
             i += 1
-            opo = GSEMO(instance)
-            p1= opo.run(alpha, delta, fitness_evaluations, CHEBYSHEV)
+            p1= algo.run(alpha, delta, fitness_evaluations, CHEBYSHEV)
             P1 += p1
             #print("Iteration ", i, " (Chebyshev) : ", p1)
             
@@ -34,10 +33,7 @@ def test(instance:Knapsack, alpha, delta, test_loops, fitness_evaluations, metho
         i = 0
         while i < test_loops:
             i += 1
-
-            #opo = OnePlusOne(instance)
-            opo = GSEMO(instance)
-            p2 = opo.run(alpha, delta, fitness_evaluations, CHERNOFF)
+            p2 = algo.run(alpha, delta, fitness_evaluations, CHERNOFF)
             #print("Iteration ", i, " (Chernoff): ", p2)
             P2 += p2
     P1 /= test_loops
@@ -65,11 +61,15 @@ def main():
 
 
     method = int(input("\nSelect method(s) for probability calculations ... \nChebyshev(1) | Chernoff(2) | Both (3) : "))
-    
+    algo = int (input("\nSelect algorithm(s) ... \nOne Plus One(1) | GSEMO (2) : "))
     for instance in instances:
         for alpha in alpha_params:
             for delta in delta_params:
-                [cheby, chern] = test(instance, alpha, delta, test_loops, fitness_evaluations, method)
+                if(algo == 1):
+                    algo_obj = OnePlusOne(instance)
+                else:
+                    algo_obj = GSEMO(instance)
+                [cheby, chern] = test(algo_obj, alpha, delta, test_loops, fitness_evaluations, method)
                 trials.append([instance.label,instance.bound,alpha, delta, chern,cheby])
                 print(trials[len(trials)-1])
     writeOutput(trials)
