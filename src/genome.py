@@ -37,10 +37,12 @@ class Genome:
     def mutation(self, items= []):
         g = self.genome
         i = 0
+        count = 0
         while i < self.n :
 ##            mutationPos = int(uniform(0, self.n))
             mutationPos = int(random()* 100)
             if mutationPos == i :
+                count +=1
                 g[i]= abs(g[i] - 1)
                 if(len(items) > 0):
                     if g[i] == 1 :
@@ -52,6 +54,8 @@ class Genome:
                         self.ew -= items[i].expected_weight
                         self.p -= items[i].profit
             i += 1
+        if ( count == 0 ):
+            self.mutation(items)
             #break
 
     def expected_weight(self, items:[Item]):
