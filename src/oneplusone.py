@@ -51,9 +51,10 @@ class OnePlusOne (EA):
                 diff = B - ew
                 k = genome.countItems()
                 if(method == CHEBYSHEV):
-                    v = max(chebyshev_v(k, diff, alpha, delta), 0)
+                    v = max(self.chebyshev_v(k, diff, alpha, delta), 0)
                 if(method == CHERNOFF):
-                    v = max(chernoff_v(k, diff, alpha, delta),0)
+                    v = max(self.chernoff_v(k, diff, alpha, delta),0)
+                    
                 return Fitness(0, v, p)
             else:
                 u = ew - B
